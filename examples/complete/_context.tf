@@ -21,8 +21,9 @@
 #
 
 module "context" {
-  source  = "app.terraform.io/SevenPico/context/null"
-  version = "0.0.2" # requires Terraform >= 0.13.0
+#  source  = "app.terraform.io/SevenPico/context/null"
+#  version = "0.0.2" # requires Terraform >= 0.13.0
+  source = "../../"
 
   enabled             = var.enabled
   namespace           = var.namespace
@@ -298,13 +299,13 @@ variable "descriptor_formats" {
 variable "domain_name" {
   type        = string
   default     = null
-  description = "parent dns name"
+  description = "Route53 Zone domain name."
 }
 
 variable "dns_name_format" {
   type        = string
-  default     = "$${name}.$${domain_name}"
-  description = "format string for dns_name output"
+  default     = null
+  description = "Format string for dns_name output.  Default is $${name}.$${domain_name}."
 }
 
 output "context" { value = module.context.context }

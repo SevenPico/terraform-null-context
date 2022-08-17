@@ -12,6 +12,8 @@ locals {
     id_hash_length      = 5
     label_key_case      = "title"
     label_value_case    = "lower"
+    domain_name         = ""
+    dns_name_format     = "$${name}.$${domain_name}"
 
     # The default value of labels_as_tags cannot be included in this
     # defaults` map because it creates a circular dependency
@@ -59,8 +61,6 @@ locals {
     attributes = compact(distinct(concat(coalesce(var.context.attributes, []), coalesce(var.attributes, []))))
     tags       = merge(var.context.tags, var.tags)
 
-    domain_name = var.domain_name == null ? lookup(var.context, "domain_name", null) : var.domain_name
-
     additional_tag_map  = merge(var.context.additional_tag_map, var.additional_tag_map)
     label_order         = var.label_order == null ? var.context.label_order : var.label_order
     regex_replace_chars = var.regex_replace_chars == null ? var.context.regex_replace_chars : var.regex_replace_chars
@@ -70,6 +70,9 @@ locals {
 
     descriptor_formats = merge(lookup(var.context, "descriptor_formats", {}), var.descriptor_formats)
     labels_as_tags     = local.context_labels_as_tags_is_unset ? var.labels_as_tags : var.context.labels_as_tags
+
+    domain_name     = var.domain_name == null ? lookup(var.context, "domain_name", null) : var.domain_name
+    dns_name_format = var.dns_name_format == null ? lookup(var.context, "dns_name_format", null) : var.dns_name_format
   }
 
   enabled             = local.input.enabled
@@ -113,7 +116,8 @@ locals {
   # Just for standardization and completeness
   descriptor_formats = local.input.descriptor_formats
 
-  domain_name = local.input.domain_name
+  domain_name = local.input.domain_name == null ? local.defaults.domain_name : local.input.domain_name
+  dns_name_format = local.input.dns_name_format == null ? local.defaults.dns_name_format : local.input.dns_name_format
 
   additional_tag_map = merge(var.context.additional_tag_map, var.additional_tag_map)
 
@@ -178,7 +182,7 @@ locals {
   id_short = substr("${local.id_truncated}${local.id_hash}", 0, local.id_length_limit)
   id       = local.id_length_limit != 0 && length(local.id_full) > local.id_length_limit ? local.id_short : local.id_full
 
-  dns_name = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(var.dns_name_format,
+  dns_name = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(local.dns_name_format,
     "$${namespace}", local.namespace),
     "$${tenant}", local.tenant),
     "$${project}", local.project),
@@ -211,6 +215,7 @@ locals {
     labels_as_tags      = local.labels_as_tags
     descriptor_formats  = local.descriptor_formats
     domain_name         = local.domain_name
+    dns_name_format     = local.dns_name_format
   }
 
 }
