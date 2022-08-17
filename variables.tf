@@ -19,6 +19,7 @@ variable "context" {
     label_key_case      = null
     label_value_case    = null
     descriptor_formats  = {}
+    domain_name         = null
     # Note: we have to use [] instead of null for unset lists due to
     # https://github.com/hashicorp/terraform/issues/28137
     # which was not fixed until Terraform 1.0.0,
@@ -241,7 +242,7 @@ variable "descriptor_formats" {
     EOT
 }
 
-variable "parent_dns_name" {
+variable "domain_name" {
   type        = string
   default     = null
   description = "parent dns name"
@@ -249,6 +250,6 @@ variable "parent_dns_name" {
 
 variable "dns_name_format" {
   type        = string
-  default     = "$${name}.$${parent_zone_name}"
+  default     = "$${name}.$${domain_name}"
   description = "format string for dns_name output"
 }

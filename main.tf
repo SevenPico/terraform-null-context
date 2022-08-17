@@ -59,7 +59,7 @@ locals {
     attributes = compact(distinct(concat(coalesce(var.context.attributes, []), coalesce(var.attributes, []))))
     tags       = merge(var.context.tags, var.tags)
 
-    parent_dns_name = var.parent_dns_name == null ? lookup(var.context, "parent_dns_name", null) : var.parent_dns_name
+    domain_name = var.domain_name == null ? lookup(var.context, "domain_name", null) : var.domain_name
 
     additional_tag_map  = merge(var.context.additional_tag_map, var.additional_tag_map)
     label_order         = var.label_order == null ? var.context.label_order : var.label_order
@@ -113,7 +113,7 @@ locals {
   # Just for standardization and completeness
   descriptor_formats = local.input.descriptor_formats
 
-  parent_dns_name = local.input.parent_dns_name
+  domain_name = local.input.domain_name
 
   additional_tag_map = merge(var.context.additional_tag_map, var.additional_tag_map)
 
@@ -179,17 +179,17 @@ locals {
   id       = local.id_length_limit != 0 && length(local.id_full) > local.id_length_limit ? local.id_short : local.id_full
 
   dns_name = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(var.dns_name_format,
-    "$${namespace}"       , local.namespace),
-    "$${tenant}"          , local.tenant),
-    "$${project}"         , local.project),
-    "$${region}"          , local.region),
-    "$${environment}"     , local.environment),
-    "$${name}"            , local.name),
-    "$${stage}"           , local.stage),
-    "$${id}"              , local.id),
-    "$${attributes}"      , join(local.delimiter, local.attributes)),
-    "$${parent_dns_name}" , local.parent_dns_name),
-    "$${region}"          , local.region)
+    "$${namespace}", local.namespace),
+    "$${tenant}", local.tenant),
+    "$${project}", local.project),
+    "$${region}", local.region),
+    "$${environment}", local.environment),
+    "$${name}", local.name),
+    "$${stage}", local.stage),
+    "$${id}", local.id),
+    "$${attributes}", join(local.delimiter, local.attributes)),
+    "$${domain_name}", local.domain_name),
+  "$${region}", local.region)
 
   # Context of this label to pass to other label modules
   output_context = {
@@ -210,7 +210,7 @@ locals {
     label_value_case    = local.label_value_case
     labels_as_tags      = local.labels_as_tags
     descriptor_formats  = local.descriptor_formats
-    parent_dns_name     = local.parent_dns_name
+    domain_name         = local.domain_name
   }
 
 }
