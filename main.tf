@@ -71,8 +71,8 @@ locals {
     descriptor_formats = merge(lookup(var.context, "descriptor_formats", {}), var.descriptor_formats)
     labels_as_tags     = local.context_labels_as_tags_is_unset ? var.labels_as_tags : var.context.labels_as_tags
 
-    domain_name     = var.domain_name == null ? lookup(var.context, "domain_name", null) : var.domain_name
-    dns_name_format = var.dns_name_format == null ? lookup(var.context, "dns_name_format", null) : var.dns_name_format
+    domain_name     = var.domain_name == null ? var.context.domain_name : var.domain_name
+    dns_name_format = var.dns_name_format == null ? var.context.dns_name_format: var.dns_name_format
   }
 
   enabled             = local.input.enabled
@@ -116,7 +116,7 @@ locals {
   # Just for standardization and completeness
   descriptor_formats = local.input.descriptor_formats
 
-  domain_name = local.input.domain_name == null ? local.defaults.domain_name : local.input.domain_name
+  domain_name     = local.input.domain_name == null ? local.defaults.domain_name : local.input.domain_name
   dns_name_format = local.input.dns_name_format == null ? local.defaults.dns_name_format : local.input.dns_name_format
 
   additional_tag_map = merge(var.context.additional_tag_map, var.additional_tag_map)

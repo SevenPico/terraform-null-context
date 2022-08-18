@@ -114,11 +114,11 @@ EOT
 }
 
 output "dns_name_format" {
-  value       = local.enabled ? var.dns_name_format : ""
+  value       = local.enabled ? local.dns_name_format : ""
   description = "dns name format"
 }
 
 output "domain_name" {
-  value       = local.enabled ? var.domain_name : ""
+  value       = local.enabled ? local.domain_name : ""
   description = "Domain name."
 }
