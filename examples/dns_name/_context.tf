@@ -308,4 +308,4 @@ variable "dns_name_format" {
   description = "Format string for dns_name output.  Default is $${name}.$${domain_name}."
 }
 
-output "context" { value = module.context.context }
+output "self" { value = module.context.self }

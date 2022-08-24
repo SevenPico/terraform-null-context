@@ -1,5 +1,5 @@
 module "dns_context" {
   source = "../../"
-  context = module.context.context
+  context = module.context.self
   name = "hello"
 }

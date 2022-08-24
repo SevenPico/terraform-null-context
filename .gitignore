@@ -7,7 +7,7 @@
 **/.terraform.lock.hcl
 
 # .tfvars files
-*.tfvars
+#*.tfvars
 
 **/.idea
 **/*.iml

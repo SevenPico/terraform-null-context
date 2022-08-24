@@ -1,5 +1,7 @@
 locals {
 
+  legacy_incompatible_attributes = ["project", "region", "domain_name", "dns_name_format"]
+
   defaults = {
     # The `tenant` label was introduced in v0.25.0. To preserve backward compatibility, or, really, to ensure
     # that people using the `tenant` label are alerted that it was not previously supported if they try to
@@ -73,6 +75,35 @@ locals {
 
     domain_name     = var.domain_name == null ? var.context.domain_name : var.domain_name
     dns_name_format = var.dns_name_format == null ? var.context.dns_name_format: var.dns_name_format
+  }
+
+  # BACKWARDS COMPATIBLE INPUTS for Outputs.
+  # The values provided by variables supersede the values inherited from the context object,
+  # except for tags and attributes which are merged.
+  legacy_input = {
+    # It would be nice to use coalesce here, but we cannot, because it
+    # is an error for all the arguments to coalesce to be empty.
+    enabled   = var.enabled == null ? var.context.enabled : var.enabled
+    namespace = var.namespace == null ? var.context.namespace : var.namespace
+    # tenant was introduced in v0.25.0, prior context versions do not have it
+    tenant      = var.tenant == null ? lookup(var.context, "tenant", null) : var.tenant
+    environment = var.environment == null ? var.context.environment : var.environment
+    stage       = var.stage == null ? var.context.stage : var.stage
+    name        = var.name == null ? var.context.name : var.name
+    delimiter   = var.delimiter == null ? var.context.delimiter : var.delimiter
+    # modules tack on attributes (passed by var) to the end of the list (passed by context)
+    attributes = compact(distinct(concat(coalesce(var.context.attributes, []), coalesce(var.attributes, []))))
+    tags       = merge(var.context.tags, var.tags)
+
+    additional_tag_map  = merge(var.context.additional_tag_map, var.additional_tag_map)
+    label_order         = var.label_order == null ? setsubtract(var.context.label_order, local.legacy_incompatible_attributes) : setsubtract(var.label_order, local.legacy_incompatible_attributes)
+    regex_replace_chars = var.regex_replace_chars == null ? var.context.regex_replace_chars : var.regex_replace_chars
+    id_length_limit     = var.id_length_limit == null ? var.context.id_length_limit : var.id_length_limit
+    label_key_case      = var.label_key_case == null ? lookup(var.context, "label_key_case", null) : var.label_key_case
+    label_value_case    = var.label_value_case == null ? lookup(var.context, "label_value_case", null) : var.label_value_case
+
+    descriptor_formats = merge(lookup(var.context, "descriptor_formats", {}), var.descriptor_formats)
+    labels_as_tags     = local.context_labels_as_tags_is_unset ? var.labels_as_tags : var.context.labels_as_tags
   }
 
   enabled             = local.input.enabled

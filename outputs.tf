@@ -97,9 +97,10 @@ output "normalized_context" {
   description = "Normalized context of this module"
 }
 
-output "context" {
-  value       = local.input
+output "legacy" {
+  value       = local.legacy_input
   description = <<-EOT
+  Backwards compatible for CloudPosse Module inputs, removes new attributes added.
   Merged but otherwise unmodified input to this module, to be used as context input to other modules.
   Note: this version will have null values as defaults, not the values actually used as defaults.
 EOT
