@@ -1,6 +1,8 @@
 locals {
   tenant      = "Brim"
 
+  region = get_env("AWS_REGION")
+
   namespace   = "brim"
   project     = replace(basename(get_repo_root()), "teraform-", "")
   environment = ""
@@ -20,6 +22,7 @@ locals {
 }
 
 inputs = {
+  region = local.region
   tenant              = local.tenant
   project             = local.project
   domain_name         = local.domain_name
@@ -48,7 +51,7 @@ remote_state {
     dynamodb_table        = "brim-sandbox-tfstate-lock"
     encrypt               = true
     key                   = "${local.project}/${local.stage}/terraform.tfstate"
-    region                = get_env("AWS_REGION")
+    region                = local.region
   }
   generate = {
     path      = "generated-backend.tf"
@@ -73,7 +76,7 @@ generate "providers" {
   }
 
   provider "aws" {
-    region  = "${get_env("AWS_REGION})"
+    region  = "${local.region}"
   }
   EOF
 }
