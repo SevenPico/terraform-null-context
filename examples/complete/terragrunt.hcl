@@ -6,7 +6,7 @@ locals {
   tenant      = "Brim"
 
   namespace   = "brim"
-  project     = replace(basename(get_repo_root(), "teraform-", ""))
+  project     = replace(basename(get_repo_root()), "teraform-", "")
   environment = ""
   stage       = basename(get_terragrunt_dir()) //
   domain_name = "${local.stage}.${local.project}.thebrim.io"
