@@ -1,3 +1,7 @@
+dependency "tfstate" {
+  config_path = "${get_repo_root()}/management/terraform-bootstrap"
+}
+
 locals {
   tenant      = "Brim"
 
@@ -21,7 +25,7 @@ locals {
 
 inputs = {
   enabled = true
-  region = "us-east-1"
+  region  = "us-east-1"
   tenant              = local.tenant
   project             = local.project
   region              = local.region
@@ -40,4 +44,43 @@ inputs = {
   label_value_case    = local.label_value_case
   label_order         = local.label_order
   dns_name_format     = local.dns_name_format
+}
+
+remote_state {
+  backend = "s3"
+  disable_init = false
+  config  = {
+    bucket                = dependency.tfstate.outputs.bucket_map["Sandbox"].bucket_id
+    disable_bucket_update = true
+    dynamodb_table        = dependency.tfstate.outputs.dynamodb_table_map["Sandbox"].table_name
+    encrypt               = true
+    key                   = "${local.project}/${local.stage}/terraform.tfstate"
+    region                = local.region
+  }
+  generate = {
+    path      = "generated-backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+}
+
+generate "providers" {
+  path      = "generated-providers.tf"
+  if_exists = "overwrite"
+  contents  = <<EOF
+  terraform {
+    required_providers {
+      aws = {
+        source  = "hashicorp/aws"
+        version = "~> 4"
+      }
+      local = {
+        source  = "hashicorp/local"
+      }
+    }
+  }
+
+  provider "aws" {
+    region  = "${local.region}"
+  }
+  EOF
 }
