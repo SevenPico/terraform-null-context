@@ -1,7 +1,3 @@
-dependency "tfstate" {
-  config_path = "${get_repo_root()}/management/terraform-bootstrap"
-}
-
 locals {
   tenant      = "Brim"
 
