@@ -77,9 +77,7 @@ output "descriptors" {
 output "normalized_context" {
   value = module.context.normalized_context
 }
-output "self" {
-  value = module.context.self
-}
+
 output "dns_name_format" {
   value = module.context.dns_name_format
 }
