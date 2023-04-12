@@ -4,7 +4,7 @@ locals {
   region = get_env("AWS_REGION")
 
   namespace   = "brim"
-  project     = replace(basename(get_repo_root()), "teraform-", "")
+  project     = "null-context" //replace(basename(get_repo_root()), "teraform-", "")
   environment = ""
   stage       = basename(get_terragrunt_dir()) //
   domain_name = "${local.stage}.${local.project}.thebrim.io"
