@@ -1,13 +1,15 @@
 locals {
+  account_id  = get_aws_account_id()
   tenant      = "Brim"
 
   region = get_env("AWS_REGION")
+  root_domain = "modules.thebrim.io"
 
   namespace   = "brim"
   project     = "null-context" //replace(basename(get_repo_root()), "teraform-", "")
   environment = ""
   stage       = basename(get_terragrunt_dir()) //
-  domain_name = "${local.stage}.${local.project}.thebrim.io"
+  domain_name = "${local.stage}.${local.project}.${local.root_domain}"
 
   tags = { Source = "Managed by Terraform" }
   regex_replace_chars = "/[^-a-zA-Z0-9]/"
@@ -50,7 +52,7 @@ remote_state {
     disable_bucket_update = true
     dynamodb_table        = "brim-sandbox-tfstate-lock"
     encrypt               = true
-    key                   = "${local.project}/${local.stage}/terraform.tfstate"
+    key                   = "${local.account_id}/${local.project}/${local.stage}/terraform.tfstate"
     region                = local.region
   }
   generate = {
