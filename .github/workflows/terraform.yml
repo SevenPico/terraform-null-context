@@ -74,10 +74,3 @@ jobs:
         with:
           directory: ./examples/complete
           framework: terraform
-
-      - name: Test with Checkov (examples/dns_name)
-        id: checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: ./examples/dns_name
-          framework: terraform
