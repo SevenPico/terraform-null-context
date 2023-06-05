@@ -21,7 +21,7 @@
 ## ----------------------------------------------------------------------------
 
 module "dns_context" {
-  source = "../../"
+  source  = "../../"
   context = module.context.self
-  name = "hello"
+  name    = "hello"
 }
