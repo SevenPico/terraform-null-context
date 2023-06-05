@@ -75,31 +75,9 @@ jobs:
           directory: ./examples/complete
           framework: terraform
 
-
-      - name: Validate Module Files
-        run: |
-          # Define the readme, license, and notice file paths
-          README_FILE="./README.txt"
-          LICENSE_FILE="./LICENSE"
-          NOTICE_FILE="./NOTICE"
-          
-          # Loop through all modules and validate files
-          find . -type d -name ".terraform" -prune -o -type f -name "*.tf" | while read -r file; do
-            # Validate readme
-            if ! grep -qFf "$README_FILE" "$file"; then
-              echo "Missing readme in $file"
-              exit 1
-            fi
-            
-            # Validate license file
-            if ! test -f "${file%.*}.LICENSE" || ! cmp -s "$LICENSE_FILE" "${file%.*}.LICENSE"; then
-              echo "Missing or mismatched license file in $file"
-              exit 1
-            fi
-            
-            # Validate notice file
-            if ! test -f "${file%.*}.NOTICE" || ! cmp -s "$NOTICE_FILE" "${file%.*}.NOTICE"; then
-              echo "Missing or mismatched notice file in $file"
-              exit 1
-            fi
-          done
+      - name: Test with Checkov (examples/dns_name)
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ./examples/dns_name
+          framework: terraform
