@@ -10,7 +10,7 @@ on:
     branches:
       - master
       - develop
-      - feature/2.0.1_git_workflow
+#      - feature/2.0.1_git_workflow
   pull_request:
 
 jobs:
@@ -36,19 +36,6 @@ jobs:
       - name: terraform validate
         uses: dflook/terraform-validate@v1.31.1
 
-#  tfsec:
-#    name: Run AquaSecurity scan
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Clone repo.
-#        uses: actions/checkout@master
-#
-#      - name: tfsec
-#        uses: aquasecurity/tfsec-action@v1.0.2
-        # with:
-        #   soft_fail: true
-
   checkov:
     name: Run Bridgecrew.io scan
     runs-on: ubuntu-latest
@@ -67,10 +54,3 @@ jobs:
         with:
           directory: ./
           framework: terraform
-
-#      - name: Test with Checkov (examples/complete)
-#        id: checkov_examples_complete
-#        uses: bridgecrewio/checkov-action@master
-#        with:
-#          directory: ./examples/complete
-#          framework: terraform
