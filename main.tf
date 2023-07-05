@@ -96,7 +96,7 @@ locals {
     labels_as_tags     = local.context_labels_as_tags_is_unset ? var.labels_as_tags : var.context.labels_as_tags
 
     domain_name     = var.domain_name == null ? var.context.domain_name : var.domain_name
-    dns_name_format = var.dns_name_format == null ? var.context.dns_name_format: var.dns_name_format
+    dns_name_format = var.dns_name_format == null ? var.context.dns_name_format : var.dns_name_format
   }
 
   # BACKWARDS COMPATIBLE INPUTS for Outputs.
