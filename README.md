@@ -2,6 +2,18 @@
 
 Terraform module designed to generate consistent names and tags for resources. Use `terraform-null-context` to implement a strict naming convention.
 
+## Why Use This Module
+
+This module helps you create consistent and predictable names and tags for your resources, ensuring that they follow a strict naming convention. This is particularly useful for managing resources across multiple environments and stages.
+
+## Functional Diagram
+
+No Functional Diagram
+
+## Deployed Resources
+
+This module does not deploy any resources directly. Instead, it generates names and tags that can be used by other modules to deploy resources.
+
 ## Usage
 
 ### Simple Example
@@ -47,6 +59,49 @@ resource "aws_instance" "example" {
 }
 ```
 
+## Configuration Summary
+
+- **Naming Conventions**: Use the `namespace`, `stage`, `name`, and `attributes` variables to create a consistent naming convention.
+- **Tagging Conventions**: Use the `tags` variable to add additional tags to your resources.
+- **Common Configuration Patterns**: Use the `context` variable to set the entire context at once. Individual variable settings override the context.
+
+## Terragrunt Instructions
+
+To test-deploy and test-destroy the module in the sandbox using Terragrunt:
+
+1. Create a `terragrunt.hcl` file with the following content:
+
+   ```hcl
+   terraform {
+     source = "path/to/terraform-null-context"
+   }
+
+   inputs = {
+     namespace  = "example"
+     stage      = "prod"
+     name       = "app"
+     attributes = ["public"]
+     delimiter  = "-"
+     tags = {
+       "BusinessUnit" = "XYZ"
+       "Snapshot"     = "true"
+     }
+   }
+   ```
+
+2. Run the following commands to deploy and destroy the module:
+
+   ```sh
+   terragrunt apply
+   terragrunt destroy
+   ```
+
+## Roadmap
+
+- [ ] Add support for additional cloud providers.
+- [ ] Improve support for tagging.
+- [ ] Enhance the module to support more complex naming conventions.
+
 ## Requirements
 
 | Name      | Version   |
@@ -67,30 +122,30 @@ No resources.
 
 ## Inputs
 
-| Name                | Description                                                                   | Type           | Default       | Required |
-| ------------------- | ----------------------------------------------------------------------------- | -------------- | ------------- | :------: |
-| context             | Single object for setting entire context at once.                             | `any`          | `{}`          |    no    |
-| enabled             | Set to false to prevent the module from creating any resources                | `bool`         | `null`        |    no    |
-| namespace           | ID element. Usually an abbreviation of your organization name.                | `string`       | `null`        |    no    |
-| tenant              | ID element. A customer identifier.                                            | `string`       | `null`        |    no    |
-| region              | Region.                                                                       | `string`       | `null`        |    no    |
-| project             | The project.                                                                  | `string`       | `null`        |    no    |
-| environment         | ID element. Usually used for region or role.                                  | `string`       | `null`        |    no    |
-| stage               | ID element. Usually used to indicate role.                                    | `string`       | `null`        |    no    |
-| name                | ID element. Usually the component or solution name.                           | `string`       | `null`        |    no    |
-| delimiter           | Delimiter to be used between ID elements.                                     | `string`       | `null`        |    no    |
-| attributes          | ID element. Additional attributes to add to `id`.                             | `list(string)` | `[]`          |    no    |
-| labels_as_tags      | Set of labels to include as tags in the `tags` output.                        | `set(string)`  | `["default"]` |    no    |
-| tags                | Additional tags.                                                              | `map(string)`  | `{}`          |    no    |
-| additional_tag_map  | Additional key-value pairs to add to each map in `tags_as_list_of_maps`.      | `map(string)`  | `{}`          |    no    |
-| label_order         | The order in which the labels appear in the `id`.                             | `list(string)` | `null`        |    no    |
-| regex_replace_chars | Terraform regular expression string.                                          | `string`       | `null`        |    no    |
-| id_length_limit     | Limit `id` to this many characters.                                           | `number`       | `null`        |    no    |
-| label_key_case      | Controls the letter case of the `tags` keys.                                  | `string`       | `null`        |    no    |
-| label_value_case    | Controls the letter case of ID elements.                                      | `string`       | `null`        |    no    |
-| descriptor_formats  | Describe additional descriptors to be output in the `descriptors` output map. | `any`          | `{}`          |    no    |
-| domain_name         | Route53 Zone domain name.                                                     | `string`       | `null`        |    no    |
-| dns_name_format     | Format string for dns_name output.                                            | `string`       | `null`        |    no    |
+| Name                | Description                                                                   | Type           | Default                                                       | Required |
+| ------------------- | ----------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------- | :------: |
+| context             | Single object for setting entire context at once.                             | `any`          | `{}`                                                          |    no    |
+| enabled             | Set to false to prevent the module from creating any resources                | `bool`         | `true`                                                        |    no    |
+| namespace           | ID element. Usually an abbreviation of your organization name.                | `string`       | `null`                                                        |    no    |
+| tenant              | ID element. A customer identifier.                                            | `string`       | `null`                                                        |    no    |
+| region              | Region.                                                                       | `string`       | `null`                                                        |    no    |
+| project             | The project.                                                                  | `string`       | `null`                                                        |    no    |
+| environment         | ID element. Usually used for region or role.                                  | `string`       | `null`                                                        |    no    |
+| stage               | ID element. Usually used to indicate role.                                    | `string`       | `null`                                                        |    no    |
+| name                | ID element. Usually the component or solution name.                           | `string`       | `null`                                                        |    no    |
+| delimiter           | Delimiter to be used between ID elements.                                     | `string`       | `"-"`                                                         |    no    |
+| attributes          | ID element. Additional attributes to add to `id`.                             | `list(string)` | `[]`                                                          |    no    |
+| labels_as_tags      | Set of labels to include as tags in the `tags` output.                        | `set(string)`  | `["unset"]`                                                   |    no    |
+| tags                | Additional tags.                                                              | `map(string)`  | `{}`                                                          |    no    |
+| additional_tag_map  | Additional key-value pairs to add to each map in `tags_as_list_of_maps`.      | `map(string)`  | `{}`                                                          |    no    |
+| label_order         | The order in which the labels appear in the `id`.                             | `list(string)` | `["namespace", "environment", "stage", "name", "attributes"]` |    no    |
+| regex_replace_chars | Terraform regular expression string.                                          | `string`       | `"/[^a-zA-Z0-9-]/"`                                           |    no    |
+| id_length_limit     | Limit `id` to this many characters.                                           | `number`       | `0`                                                           |    no    |
+| label_key_case      | Controls the letter case of the `tags` keys.                                  | `string`       | `"title"`                                                     |    no    |
+| label_value_case    | Controls the letter case of ID elements.                                      | `string`       | `"lower"`                                                     |    no    |
+| descriptor_formats  | Describe additional descriptors to be output in the `descriptors` output map. | `any`          | `{}`                                                          |    no    |
+| domain_name         | Route53 Zone domain name.                                                     | `string`       | `null`                                                        |    no    |
+| dns_name_format     | Format string for dns_name output.                                            | `string`       | `"$${name}.$${domain_name}"`                                  |    no    |
 
 ## Outputs
 
@@ -142,4 +197,4 @@ All other trademarks referenced herein are the property of their respective owne
 
 ## Copyright
 
-© <!--year--> 2023-2025 <!--/year--> [SevenPico, Inc.](https://7pi.co/). All rights reserved.
+© 2023-2025 [SevenPico, Inc.](https://7pi.co/). All rights reserved.
