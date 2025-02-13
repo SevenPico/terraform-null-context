@@ -67,7 +67,7 @@ jobs:
 
       - name: Test with Checkov
         id: checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrew/checkov-action@master
         with:
           directory: ./
           framework: terraform
