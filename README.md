@@ -14,18 +14,20 @@ No Functional Diagram
 
 This module does not deploy any resources directly. Instead, it generates names and tags that can be used by other modules to deploy resources.
 
-## Usage
+## Examples
 
-### Simple Example
+### Module Usage Examples
+
+#### Simple Example
 
 ```hcl
 module "example_label" {
-  source   = "path/to/terraform-null-context"
-  namespace  = "example"
-  stage      = "prod"
-  name       = "app"
+  source    = "SevenPico/context/null"
+  namespace = "7pi"
+  stage     = "prod"
+  name      = "app"
   attributes = ["public"]
-  delimiter  = "-"
+  delimiter = "-"
 
   tags = {
     "BusinessUnit" = "XYZ",
@@ -34,18 +36,18 @@ module "example_label" {
 }
 ```
 
-This will create an `id` with the value of `example-prod-app-public`.
+_Creates an id: 7pi-prod-app-public. Outputs like `id` and `tags` are available._
 
-### Advanced Example
+#### Advanced Example
 
 ```hcl
 module "example_label" {
-  source   = "path/to/terraform-null-context"
-  namespace  = "example"
-  stage      = "prod"
-  name       = "app"
+  source    = "SevenPico/context/null"
+  namespace = "7pi"
+  stage     = "prod"
+  name      = "app"
   attributes = ["public"]
-  delimiter  = "-"
+  delimiter = "-"
 
   tags = {
     "BusinessUnit" = "XYZ",
@@ -59,48 +61,111 @@ resource "aws_instance" "example" {
 }
 ```
 
+_Outputs such as `id`, `id_full`, and `tags` can be referenced as module outputs._
+
+#### Nested Module Example
+
+```hcl
+module "slack_sns_topic_context" {
+  source     = "SevenPico/context/null"
+  version    = "2.0.0"
+  context    = module.context.self
+  attributes = ["slack", "sns"]
+}
+
+resource "aws_sns_topic" "slack_sns_topic" {
+  count         = module.slack_sns_topic_context.enabled ? 1 : 0
+  name          = module.slack_sns_topic_context.id
+  tags          = module.slack_sns_topic_context.tags
+  # ...other attributes...
+}
+```
+
+### Terragrunt Example
+
+```hcl
+terraform {
+  source = "SevenPico/context/null?ref=2.0.1"
+}
+
+inputs = {
+  namespace = "7pi"
+  stage     = "prod"
+  name      = "app"
+  attributes = ["public"]
+  delimiter = "-"
+  tags = {
+    "BusinessUnit" = "XYZ"
+    "Snapshot"     = "true"
+  }
+}
+```
+
+_Deploy using `terragrunt apply` and reference module outputs (e.g. `context.id` and `context.dns_name`)._
+
 ## Configuration Summary
 
-- **Naming Conventions**: Use the `namespace`, `stage`, `name`, and `attributes` variables to create a consistent naming convention.
-- **Tagging Conventions**: Use the `tags` variable to add additional tags to your resources.
-- **Common Configuration Patterns**: Use the `context` variable to set the entire context at once. Individual variable settings override the context.
+- **Naming Conventions**: Input variables such as `namespace`, `stage`, `name`, and `attributes` define the generated `id`.
+- **Tagging Conventions**: Additional tags and labels (via `tags` and `labels_as_tags`) appear in both module outputs and resource configurations.
+- **Outputs**: The module outputs include key properties like `id`, `id_full`, `dns_name`, and `tags` that can be directly used in dependent Terraform configurations.
 
-## Terragrunt Instructions
+## Example Explanation
 
-To test-deploy and test-destroy the module in the sandbox using Terragrunt:
+The DNS name example demonstrates how to use Terragrunt with this module. In the example:
 
-1. Create a `terragrunt.hcl` file with the following content:
+- A Terragrunt configuration (in examples/dns_name/terragrunt.hcl) sets up local variables such as account ID, tenant, region, and domain details.
+- The inputs block passes these values to the module, including naming conventions, regex filters, and tag configurations.
+- The module is used in multiple files:
+  - \_context.tf initializes the standard context required by the module.
+  - dns.tf shows a simple module call that generates a DNS name based on your provided configuration.
+  - \_outputs.tf outputs key properties such as the generated ID, DNS name, and format.
 
-   ```hcl
-   terraform {
-     source = "path/to/terraform-null-context"
-   }
-
-   inputs = {
-     namespace  = "example"
-     stage      = "prod"
-     name       = "app"
-     attributes = ["public"]
-     delimiter  = "-"
-     tags = {
-       "BusinessUnit" = "XYZ"
-       "Snapshot"     = "true"
-     }
-   }
-   ```
-
-2. Run the following commands to deploy and destroy the module:
-
-   ```sh
-   terragrunt apply
-   terragrunt destroy
-   ```
+This setup allows you to test-deploy resources in a sandbox environment and clearly see how the module processes input variables to generate a consistent naming and tagging policy.
 
 ## Roadmap
 
 - [ ] Add support for additional cloud providers.
 - [ ] Improve support for tagging.
 - [ ] Enhance the module to support more complex naming conventions.
+
+## Generated ID Explanation
+
+The module constructs an id by normalizing and concatenating values from labels defined in `label_order` (e.g. "namespace", "environment", "stage", "name", "attributes") using the specified delimiter. For instance, if
+
+- namespace = "7pi"
+- stage = "prod"
+- name = "app"
+- attributes = ["public"]
+
+Then the generated id becomes:  
+ 7pi-prod-app-public
+
+Null or empty values are omitted during concatenation.
+
+## Implementation Details
+
+- The module standardizes all naming elements (namespace, stage, name, etc.) by normalizing and concatenating them using a hyphen (`-`) as the delimiter.
+- To ensure AWS resource names (which generally have a 64-character limit) are not exceeded, SevenPico uses abbreviated values for general context (e.g., "7pi" for namespace).
+- Abbreviations and normalization (e.g., lowercasing) ensure consistency and compliance with AWS restrictions on resource naming.
+- The module supports nested contexts, allowing for chaining of configurations while preserving consistent naming and tagging conventions.
+- Labels are optionally retained as tags in the generated output while ensuring no excessive length.
+- When generating IDs in Pascal Case, setting `label_value_case` to "title" and `delimiter` to an empty string (`""`) will produce concatenated names without hyphens. However, since many AWS resources require lowercase names and enforce character limits, SevenPico recommends using kebab-case (hyphenated) to improve readability, avoid case-sensitivity issues, and comply with AWS constraints.
+
+## Resource Enablement and Inheritance
+
+- The module leverages the `module.context.enabled` flag along with `count` or `for_each` so that resources are only provisioned when needed. For example:
+
+```hcl
+resource "aws_instance" "example" {
+  count = module.context.enabled ? 1 : 0
+  instance_type = "t2.micro"
+  # ...other attributes...
+}
+```
+
+- When `enabled` is set to `false`, the resource count becomes zero, effectively destroying or preventing creation of the resource.
+
+- Additionally, attributes like `enabled` are inherited via the parent context available as `module.context.self`, so nested modules automatically receive the parent's configuration and resource enablement settings.
 
 ## Requirements
 
