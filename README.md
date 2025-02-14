@@ -101,6 +101,18 @@ inputs = {
 }
 ```
 
+_In addition, in your Terraform configuration you can reference module outputs as follows:_
+
+```hcl
+resource "aws_instance" "example" {
+  count         = module.context.enabled ? 1 : 0
+  name          = module.context.id
+  tags          = module.context.tags
+  instance_type = "t2.micro"
+  # ...other attributes...
+}
+```
+
 _Deploy using `terragrunt apply` and reference module outputs (e.g. `context.id` and `context.dns_name`)._
 
 ## Configuration Summary
