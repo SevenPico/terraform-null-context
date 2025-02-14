@@ -134,11 +134,35 @@ The DNS name example demonstrates how to use Terragrunt with this module. In the
 
 This setup allows you to test-deploy resources in a sandbox environment and clearly see how the module processes input variables to generate a consistent naming and tagging policy.
 
-## Roadmap
+# Roadmap
 
-- [ ] Add support for additional cloud providers.
-- [ ] Improve support for tagging.
-- [ ] Enhance the module to support more complex naming conventions.
+- [ ] safely support arbitrary naming
+  - [ ] all child resource modules contain ID business logic to transform any context-provided ID to resource-valid ID
+    - [ ] automatically transform case and separators for resource-specific rules (e.g. S3 all lower-case)
+    - [ ] automatically detect length violations and abbreviate or truncate segments to fit
+
+This will be accomplished in all the other SevenPico L2 modules, then documented as a feature here.
+Resources for this feature would include:
+
+| AWS Resource               | Naming Constraints                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **S3**                     | - Must be globally unique across AWS. <br> - Must be between 3 and 63 characters. <br> - Can contain lowercase letters, numbers, dots (.), and hyphens (-), but cannot start or end with a dot. <br> - Cannot contain underscores or uppercase letters. <br> - Must not be formatted like an IP address (e.g., 192.168.1.1). |
+| **VPC**                    | - Between 1 and 255 characters. <br> - Can contain letters, numbers, spaces, and special characters (.\_:/=+-%@).                                                                                                                                                                                                            |
+| **Subnet**                 | - Same as VPC: Between 1 and 255 characters. <br> - Can contain letters, numbers, spaces, and special characters (.\_:/=+-%@).                                                                                                                                                                                               |
+| **Security Group**         | - Name must be unique within the VPC. <br> - Can contain up to 255 characters. <br> - Can contain letters, numbers, spaces, and special characters (.\_:/=+-%@).                                                                                                                                                             |
+| **Network ACL**            | - Between 1 and 255 characters. <br> - Can contain letters, numbers, spaces, and special characters (.\_:/=+-%@).                                                                                                                                                                                                            |
+| **API Gateway**            | - API ID is auto-generated. <br> - API name: Up to 128 characters, can contain letters, numbers, hyphens (-), and underscores (\_).                                                                                                                                                                                          |
+| **IAM Role**               | - Must be unique within an AWS account. <br> - Can contain up to 64 characters. <br> - Can contain alphanumeric characters and the following special characters: =,.@-\_                                                                                                                                                     |
+| **DynamoDB**               | - Must be unique within an AWS account and region. <br> - Can be between 3 and 255 characters. <br> - Can contain only letters, numbers, underscores (\_), hyphens (-), and dots (.).                                                                                                                                        |
+| **RDS Database Instance**  | - Must be unique within an AWS account and region. <br> - Can be between 1 and 63 characters. <br> - Can contain only lowercase letters, numbers, and hyphens (-). <br> - Cannot start or end with a hyphen (-).                                                                                                             |
+| **Redshift Serverless**    | - Namespace and Workgroup names: Between 3 and 64 characters. <br> - Can contain lowercase letters, numbers, and hyphens (-). <br> - Must start with a letter and cannot end with a hyphen (-).                                                                                                                              |
+| **Lambda Function**        | - Up to 140 characters. <br> - Can contain only letters, numbers, hyphens (-), and underscores (\_).                                                                                                                                                                                                                         |
+| **Step Function**          | - Must be unique within an AWS account and region. <br> - Can be between 1 and 80 characters. <br> - Can contain letters, numbers, hyphens (-), and underscores (\_).                                                                                                                                                        |
+| **SQS Queue**              | - Standard Queue: Up to 80 characters. <br> - FIFO Queue: Must end with `.fifo` and can be up to 80 characters (including `.fifo`). <br> - Can contain alphanumeric characters, underscores (\_), and hyphens (-).                                                                                                           |
+| **SNS Topic**              | - Must be unique within an AWS account and region. <br> - Can be between 1 and 256 characters. <br> - Can contain only letters, numbers, hyphens (-), and underscores (\_).                                                                                                                                                  |
+| **EventBridge Rule**       | - Must be unique within an AWS account and region. <br> - Can be between 1 and 64 characters. <br> - Can contain only letters, numbers, hyphens (-), and underscores (\_).                                                                                                                                                   |
+| **Bedrock Knowledge Base** | - Name must be unique within an AWS account and region. <br> - Can contain alphanumeric characters, underscores (\_), and hyphens (-). <br> - Maximum length of 64 characters.                                                                                                                                               |
+| **Bedrock Agent**          | - Agent name must be unique within an AWS account. <br> - Can contain letters, numbers, underscores (\_), and hyphens (-). <br> - Maximum length of 64 characters.                                                                                                                                                           |
 
 ## Generated ID Explanation
 
